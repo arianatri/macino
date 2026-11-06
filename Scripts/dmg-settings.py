@@ -1,0 +1,22 @@
+import os
+root = os.path.abspath(defines.get("root", os.getcwd()))
+files = [os.path.join(root, 'build/macino.app')]
+symlinks = {'Applications': '/Applications'}
+background = os.path.join(root, 'Resources/Installer/installer.tiff')
+icon = os.path.join(root, 'Resources/AppIcon.icns')
+format = 'UDZO'
+filesystem = 'HFS+'
+window_rect = ((160, 140), (720, 480))
+icon_locations = {'macino.app': (190, 250), 'Applications': (530, 250)}
+icon_size = 112
+text_size = 13
+hide_extensions = []  # FinderInfo on a signed bundle invalidates strict signature validation.
+show_status_bar = False
+show_tab_view = False
+show_toolbar = False
+show_pathbar = False
+show_sidebar = False
+arrange_by = None
+default_view = 'icon-view'
+include_icon_view_settings = True
+include_list_view_settings = False

@@ -1,0 +1,20 @@
+macino Android support
+
+MTP: libmtp 1.1.23 (LGPL 2.1 or later), libusb 1.0.30 (LGPL 2.1 or later).
+These are unmodified upstream sources, compiled for arm64 macOS 14.0.
+Shared libraries are loaded from the Android resource directory, not Homebrew.
+Corresponding source archives are included in Android/Sources; build commands
+and dependency hashes are in Scripts/build-android-tools.sh in the macino source.
+License texts accompany this file. The libraries may be replaced or relinked.
+https://github.com/libmtp/libmtp/tree/v1.1.23
+https://github.com/libusb/libusb/tree/v1.0.30
+
+Screen mirroring: scrcpy 5.0.1 official macOS arm64 distribution (Apache 2.0),
+including its upstream adb executable and scrcpy-server. The archive's SHA-256
+is pinned in the build script. Binary source and build instructions:
+https://github.com/Genymobile/scrcpy/tree/v5.0.1
+https://github.com/Genymobile/scrcpy/blob/v5.0.1/doc/build.md
+https://github.com/Genymobile/scrcpy-deps
+ADB is part of Android Open Source Project (Apache 2.0):
+https://android.googlesource.com/platform/packages/modules/adb/
+No device access or Android setting is automatically approved by macino.

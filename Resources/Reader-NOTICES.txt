@@ -1,0 +1,19 @@
+macino offline Reader
+
+Native inference: sherpa-onnx 1.13.8 (Apache 2.0) and ONNX Runtime (MIT).
+https://github.com/k2-fsa/sherpa-onnx/tree/v1.13.8
+https://github.com/microsoft/onnxruntime
+Phonemization: bundled espeak-ng data and code (GPL 3); license accompanies this file.
+https://github.com/espeak-ng/espeak-ng
+https://github.com/k2-fsa/sherpa-onnx/blob/v1.13.8/cmake/espeak-ng.cmake
+
+Persian: Piper fa_IR-amir-medium; dataset CC0.
+English: Piper en_US-ljspeech-medium; dataset public domain.
+The corresponding upstream model cards accompany this notice.
+https://github.com/k2-fsa/sherpa-onnx/releases/tag/tts-models
+https://huggingface.co/rhasspy/piper-voices
+
+Only a separate, on-demand helper links the speech libraries. macino's main
+process does not link them or open the voice models. All runtime assets are
+bundled, and both import and inference run with network access denied by macOS.
+Pinned downloads and build instructions: Scripts/build-reader-tools.sh.

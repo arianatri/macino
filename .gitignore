@@ -1,0 +1,14 @@
+.build/
+build/
+.DS_Store
+.swiftpm/
+
+# Reproducible installer artwork and local packaging output
+Resources/Installer/
+__pycache__/
+*.pyc
+*.log
+.env
+.env.*
+*.pem
+*.key
