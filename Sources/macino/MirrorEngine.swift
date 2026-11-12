@@ -100,17 +100,17 @@ final class MirrorEngine {
         guard !isRunning else { return }
         stoppedByUser = false
         self.profile = profile
-        state = .preparing("Starte Encoder …")
+        state = .preparing("Starting the stream…")
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self else { return }
             guard let ffmpeg = Self.findFFmpeg() else {
-                self.state = .failed("ffmpeg wurde nicht gefunden. Bitte im Menü „ffmpeg installieren …“ folgen.")
+                self.state = .failed("FFmpeg isn't installed. Install it with Homebrew, then reopen macino.")
                 return
             }
             let described = device.controlURL == nil ? SSDP.describe(device) : device
             guard described.controlURL != nil else {
-                self.state = .failed("\(described.name) akzeptiert keine Wiedergabe (kein AVTransport).")
+                self.state = .failed("\(described.name) doesn't support DLNA playback, so macino can't start a stream on it.")
                 return
             }
             let transport = AVTransport(device: described)
@@ -152,13 +152,13 @@ final class MirrorEngine {
 
             // Give the TV a ~20 s cushion before it starts pulling: these
             // players buffer very little themselves and stutter otherwise.
-            self.state = .preparing("Fülle Puffer (≈20 s) …")
+            self.state = .preparing("Getting the stream ready for your TV…")
             hub.waitForBuffer(bytes: StreamHub.burstBytes, timeout: 60)
             if self.stoppedByUser { return }
 
             let ip = Self.localAddress(towards: described.ip)
             self.streamURL = "http://\(ip):\(Self.streamPort)/screen.\(profile.fileExtension)"
-            self.onLog?("Stream-URL: \(self.streamURL)")
+            self.onLog?("Stream URL: \(self.streamURL)")
 
             do {
                 try self.push()
@@ -193,7 +193,7 @@ final class MirrorEngine {
     ///   curl -r 0-2000000 http://localhost:8790/screen.mpg -o probe.mpg
     func startSelfTest(profile: MirrorProfile, captureAudio: Bool) {
         guard !isRunning, let ffmpeg = Self.findFFmpeg() else {
-            state = .failed("ffmpeg fehlt — Selbsttest nicht möglich.")
+            state = .failed("FFmpeg isn't installed, so the stream check can't start.")
             return
         }
         self.profile = profile
@@ -213,14 +213,14 @@ final class MirrorEngine {
         do { try server.start() } catch {
             state = .failed(error.localizedDescription); return
         }
-        state = .preparing("Selbsttest: Stream auf Port \(Self.streamPort)")
+        state = .preparing("Stream check ready on port \(Self.streamPort).")
     }
 
     private func push() throws {
         guard let transport else { return }
         server?.resetSession()
         try transport.play(url: streamURL,
-                           title: "Mac-Bildschirm",
+                           title: "Mac screen",
                            mime: profile.mime,
                            dlnaFlags: profile.dlnaFlags,
                            size: HTTPStreamServer.fakeSize,
@@ -249,12 +249,11 @@ final class MirrorEngine {
             case "STOPPED", "NO_MEDIA_PRESENT":
                 failures += 1
                 if failures > 8 {
-                    self.state = .failed("Der Fernseher verweigert die Wiedergabe. "
-                                         + "Bitte ein anderes Qualitätsprofil wählen.")
+                    self.state = .failed("The TV stopped the stream. Try a different video format.")
                     self.teardown()
                     return
                 }
-                self.onLog?("TV hat gestoppt — starte Wiedergabe neu …")
+                self.onLog?("The TV stopped playback. Trying to reconnect…")
                 try? self.push()
             default:
                 break

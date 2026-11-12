@@ -5,7 +5,7 @@ final class TVMirrorModel: ObservableObject {
     static let shared = TVMirrorModel()
     @Published var devices: [DLNADevice] = []
     @Published var selectedID = ""
-    @Published var status = "Find your TV on the local network."
+    @Published var status = "Choose a TV to start sharing."
     @Published var busy = false
     @Published var sharing = false
     @Published var audio = true
@@ -32,14 +32,23 @@ final class TVMirrorModel: ObservableObject {
             let found = await Task.detached(priority: .userInitiated) { SSDP.discover(timeout: 3) }.value
             devices = found.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
             if !devices.contains(where: { $0.uuid == selectedID }) { selectedID = devices.first?.uuid ?? "" }
-            status = found.isEmpty ? "No DLNA TV found. Check Wi-Fi and TV network settings." : "Found \(found.count) TV\(found.count == 1 ? "" : "s"). Select one to share."
+            if found.isEmpty {
+                status = "No compatible TV found. Check that your TV supports DLNA and both devices are on the same Wi-Fi, then search again."
+            } else {
+                let tvLabel = found.count == 1 ? "TV" : "TVs"
+                let prompt = found.count == 1 ? "Choose it to start sharing." : "Choose one to start sharing."
+                status = "Found \(found.count) compatible \(tvLabel). \(prompt)"
+            }
             busy = false
         }
     }
 
     func start() {
-        guard let selected else { status = "Choose a TV first."; return }
-        guard MirrorEngine.findFFmpeg() != nil else { status = "FFmpeg is required. Install it with Homebrew, then restart macino."; return }
+        guard let selected else { status = "Choose a TV before you start."; return }
+        guard MirrorEngine.findFFmpeg() != nil else {
+            status = "TV sharing needs FFmpeg. Install it with Homebrew, then reopen macino."
+            return
+        }
         let profile = MirrorProfile.by(id: profileID)
         engine.start(device: selected, profile: profile, captureAudio: audio)
     }
@@ -50,25 +59,25 @@ struct TVMirrorView: View {
     @StateObject private var model = TVMirrorModel.shared
     var body: some View {
         VStack(spacing: 14) {
-            Card(title: "TV screen sharing", info: "Sends your Mac display to compatible DLNA TVs on the same local network, including non-Android TVs. FFmpeg must be installed. macOS asks for Screen Recording access when sharing starts. System audio uses Apple’s built-in capture and does not need an extra driver or a change to your Mac’s sound output. Protected video may appear black, and a short delay is normal.") {
+            Card(title: "TV screen sharing", info: "Share your screen and optional system audio with a compatible DLNA TV on the same Wi-Fi. You'll need FFmpeg and Screen Recording access. macino captures system audio without an extra driver or changing your Mac's sound output. Protected content may appear black, and playback may have a short delay.") {
                 HStack(spacing: 10) {
                     Image(systemName: "tv.and.mediabox.fill").font(.title2).foregroundStyle(.teal)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Mirror Mac to TV").font(.headline)
-                        Text("Same Wi-Fi • DLNA • No Android TV needed").font(.caption).foregroundStyle(.secondary)
+                        Text("Mirror your Mac to a TV").font(.headline)
+                        Text("Works with DLNA TVs over Wi-Fi—no Android TV required").font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
-                    Button { model.refresh() } label: { Image(systemName: "arrow.clockwise") }.help("Find TVs").disabled(model.busy || model.sharing)
+                    Button { model.refresh() } label: { Image(systemName: "arrow.clockwise") }.help("Search for TVs again").disabled(model.busy || model.sharing)
                 }
                 if !model.devices.isEmpty {
                     Picker("TV", selection: $model.selectedID) {
                         ForEach(model.devices, id: \.uuid) { Text("\($0.name) • \($0.ip)").tag($0.uuid) }
                     }.disabled(model.sharing)
                 }
-                Picker("Video quality", selection: $model.profileID) {
+                Picker("Video format", selection: $model.profileID) {
                     ForEach(MirrorProfile.all, id: \.id) { Text($0.title).tag($0.id) }
                 }.disabled(model.sharing)
-                Toggle("Send Mac audio to TV", isOn: $model.audio).disabled(model.sharing)
+                Toggle("Send system audio to TV", isOn: $model.audio).disabled(model.sharing)
                 Text(model.status).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
                 HStack {
                     if model.sharing { Button("Stop sharing", role: .destructive) { model.stop() } }

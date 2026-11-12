@@ -2,7 +2,7 @@
   <img src="docs/assets/icon.png" width="88" alt="macino icon">
   <h1>macino</h1>
   <p>Everyday Mac tools. One place in your menu bar.</p>
-  <p><strong>1.1.1 · Apple silicon · macOS 14+</strong></p>
+  <p><strong>1.1.2 · Apple silicon · macOS 14+</strong></p>
   <p><a href="https://github.com/ArianAtri/macino/releases">Downloads & releases</a> · <a href="docs/install.md">Install</a> · <a href="docs/guide.md">User guide</a></p>
 </div>
 

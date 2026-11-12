@@ -29,8 +29,16 @@ enum DLNAError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .noAVTransport(let n): return "\(n) bietet keinen AVTransport-Dienst (kein Media Renderer)."
-        case .http(let c, let a): return "Der Fernseher lehnte \(a) ab (UPnP-Fehler \(c))."
+        case .noAVTransport(let name): return "\(name) doesn't support DLNA playback."
+        case .http(let code, let action):
+            let operation: String
+            switch action {
+            case "SetAVTransportURI": operation = "load the stream"
+            case "Play": operation = "start playback"
+            case "Stop": operation = "stop playback"
+            default: operation = "complete the request"
+            }
+            return "The TV couldn't \(operation) (UPnP error \(code))."
         case .network(let m): return m
         }
     }
@@ -164,7 +172,7 @@ enum SSDP {
 
 func httpGetString(_ url: URL, timeout: TimeInterval) -> String? {
     var req = URLRequest(url: url, timeoutInterval: timeout)
-    req.setValue("MirrorCast/1.0 (macOS)", forHTTPHeaderField: "User-Agent")
+    req.setValue("macino (macOS)", forHTTPHeaderField: "User-Agent")
     var result: String?
     let sem = DispatchSemaphore(value: 0)
     URLSession.shared.dataTask(with: req) { data, _, _ in
@@ -196,7 +204,7 @@ struct AVTransport {
         req.httpMethod = "POST"
         req.setValue("text/xml; charset=\"utf-8\"", forHTTPHeaderField: "Content-Type")
         req.setValue("\"\(stype)#\(action)\"", forHTTPHeaderField: "SOAPAction")
-        req.setValue("MirrorCast/1.0 (macOS)", forHTTPHeaderField: "User-Agent")
+        req.setValue("macino (macOS)", forHTTPHeaderField: "User-Agent")
         req.httpBody = Data(envelope.utf8)
 
         var text = ""

@@ -1,5 +1,10 @@
 # What’s new
 
+## 1.1.2
+
+- Rewrote the TV sharing page, format descriptions and error messages in clear,
+  natural English.
+
 ## 1.1.1
 
 - Captures TV stream audio with Apple's built-in ScreenCaptureKit, with no

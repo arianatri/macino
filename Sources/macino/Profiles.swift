@@ -30,8 +30,8 @@ struct MirrorProfile: Equatable {
     static let all: [MirrorProfile] = [
         MirrorProfile(
             id: "ps",
-            title: "MPEG-2 / AC3 (empfohlen)",
-            detail: "MPEG-PS 720×576 — läuft auf Philips & Co. ab ~2012",
+            title: "MPEG-2 / AC3 (Recommended)",
+            detail: "Standard definition. A good first choice for older TVs.",
             mime: "video/mpeg",
             dlnaPN: "DLNA.ORG_PN=MPEG_PS_PAL;",
             fileExtension: "mpg",
@@ -45,7 +45,7 @@ struct MirrorProfile: Equatable {
         MirrorProfile(
             id: "ps-mp2",
             title: "MPEG-2 / MP2",
-            detail: "wie oben, aber MP2-Ton (für Geräte ohne AC3-Lizenz)",
+            detail: "Try this if your TV has no sound with AC3.",
             mime: "video/mpeg",
             dlnaPN: "DLNA.ORG_PN=MPEG_PS_PAL;",
             fileExtension: "mpg",
@@ -59,7 +59,7 @@ struct MirrorProfile: Equatable {
         MirrorProfile(
             id: "m2ts",
             title: "M2TS / MPEG-2",
-            detail: "192-Byte-Transportstrom, MIME video/vnd.dlna.mpeg-tts",
+            detail: "Standard definition transport stream.",
             mime: "video/vnd.dlna.mpeg-tts",
             dlnaPN: "DLNA.ORG_PN=MPEG_TS_SD_EU_T;",
             fileExtension: "m2ts",
@@ -73,7 +73,7 @@ struct MirrorProfile: Equatable {
         MirrorProfile(
             id: "mkv-h264",
             title: "H.264 / MKV (HD)",
-            detail: "720p — für neuere Fernseher mit H.264-Unterstützung",
+            detail: "720p HD for TVs that support H.264 in MKV.",
             mime: "video/x-matroska",
             dlnaPN: "",
             fileExtension: "mkv",
@@ -88,7 +88,7 @@ struct MirrorProfile: Equatable {
         MirrorProfile(
             id: "m2ts-h264",
             title: "H.264 / M2TS (HD)",
-            detail: "720p im Transportstrom",
+            detail: "720p HD in a transport stream.",
             mime: "video/vnd.dlna.mpeg-tts",
             dlnaPN: "",
             fileExtension: "m2ts",

@@ -45,7 +45,7 @@ final class HTTPStreamServer {
     func start() throws {
         signal(SIGPIPE, SIG_IGN)
         listenFD = socket(AF_INET, SOCK_STREAM, 0)
-        guard listenFD >= 0 else { throw DLNAError.network("Socket konnte nicht erstellt werden.") }
+        guard listenFD >= 0 else { throw DLNAError.network("macino couldn't open a network connection for TV sharing.") }
 
         var yes: Int32 = 1
         setsockopt(listenFD, SOL_SOCKET, SO_REUSEADDR, &yes, socklen_t(MemoryLayout<Int32>.size))
@@ -62,11 +62,11 @@ final class HTTPStreamServer {
         }
         guard bound == 0 else {
             close(listenFD)
-            throw DLNAError.network("Port \(port) ist belegt — läuft MirrorCast bereits?")
+            throw DLNAError.network("Port \(port) is already in use. Close the other app using it, then try again.")
         }
         guard listen(listenFD, 8) == 0 else {
             close(listenFD)
-            throw DLNAError.network("Der Streaming-Port konnte nicht geöffnet werden.")
+            throw DLNAError.network("macino couldn't open the streaming port.")
         }
 
         running = true
@@ -129,7 +129,7 @@ final class HTTPStreamServer {
         if let e = end, e - start + 1 <= 4 * 1024 * 1024 {
             let n = e - start + 1
             _ = writeAll(fd, hub.tail(n))
-            onLog?("Sondierung beantwortet (\(n) Bytes)")
+            onLog?("TV format check: \(n) bytes.")
             return
         }
 
@@ -138,7 +138,7 @@ final class HTTPStreamServer {
         if let base = sessionBase { want = base + start }
         lock.unlock()
 
-        onLog?(want == nil ? "Neue Stream-Session" : "Fortsetzung ab Byte \(start)")
+        onLog?(want == nil ? "TV connected to the stream." : "Stream resumed at byte \(start).")
         try? hub.stream(from: want, onBase: { [weak self] base in
             guard let self else { return }
             self.lock.lock(); self.sessionBase = base - start; self.lock.unlock()

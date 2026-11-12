@@ -84,7 +84,7 @@ final class StreamHub {
             proc.standardOutput = out
             proc.standardError = FileHandle.nullDevice
             do { try proc.run() } catch {
-                onEncoderFailure?("ffmpeg konnte nicht gestartet werden: \(error.localizedDescription)")
+                onEncoderFailure?("Couldn't start FFmpeg: \(error.localizedDescription)")
                 return
             }
             process = proc
@@ -112,8 +112,8 @@ final class StreamHub {
             if Date().timeIntervalSince(started) < 3 {
                 consecutiveFailures += 1
                 if consecutiveFailures >= 3 {
-                    onEncoderFailure?("Die Bildschirmaufnahme wurde abgelehnt. Bitte MirrorCast in "
-                        + "Systemeinstellungen › Datenschutz & Sicherheit › Bildschirmaufnahme erlauben.")
+                    onEncoderFailure?("macino couldn't capture your screen. Allow Screen Recording for both macino and FFmpeg in "
+                        + "System Settings → Privacy & Security → Screen Recording, then try again.")
                     return
                 }
             } else {

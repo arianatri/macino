@@ -28,7 +28,7 @@ final class SystemAudioCapture: NSObject, SCStreamOutput, SCStreamDelegate {
         // EPIPE error; it must never terminate the whole menu-bar app.
         _ = signal(SIGPIPE, SIG_IGN)
         guard mkfifo(fifoURL.path, mode_t(S_IRUSR | S_IWUSR)) == 0 else {
-            onFailure?("Could not prepare the system-audio stream."); return
+            onFailure?("macino couldn't set up audio for the TV stream. Try again."); return
         }
         // FFmpeg opens the FIFO reader first. Retry non-blocking opens so a
         // failed encoder or an early Stop can never strand a thread in open().
@@ -58,7 +58,7 @@ final class SystemAudioCapture: NSObject, SCStreamOutput, SCStreamDelegate {
             if isStopped { try? await capture.stopCapture() }
         } catch {
             if !isStopped {
-                onFailure?("System audio could not start. Allow macino in Privacy & Security → Screen Recording, then try again. Details: \(error.localizedDescription)")
+                    onFailure?("macino couldn't access system audio. Allow it under System Settings → Privacy & Security → Screen Recording, then try again.")
             }
         }
     }
@@ -94,7 +94,7 @@ final class SystemAudioCapture: NSObject, SCStreamOutput, SCStreamDelegate {
                 guard flags >= 0, fcntl(descriptor, F_SETFL, flags & ~O_NONBLOCK) == 0 else {
                     let errorCode = errno
                     _ = close(descriptor)
-                    if !isStopped { onFailure?("Could not configure the system-audio stream: \(String(cString: strerror(errorCode)))") }
+                    if !isStopped { onFailure?("macino couldn't set up the audio stream: \(String(cString: strerror(errorCode)))") }
                     return false
                 }
                 let handle = FileHandle(fileDescriptor: descriptor, closeOnDealloc: true)
@@ -106,12 +106,12 @@ final class SystemAudioCapture: NSObject, SCStreamOutput, SCStreamDelegate {
             }
             if errno != ENXIO && errno != EINTR {
                 let errorCode = errno
-                if !isStopped { onFailure?("Could not connect the system-audio stream: \(String(cString: strerror(errorCode)))") }
+                if !isStopped { onFailure?("macino couldn't connect system audio to the TV stream: \(String(cString: strerror(errorCode)))") }
                 return false
             }
             Thread.sleep(forTimeInterval: 0.05)
         }
-        if !isStopped { onFailure?("Could not connect the system-audio stream to FFmpeg.") }
+        if !isStopped { onFailure?("macino couldn't connect system audio to FFmpeg. Try starting the stream again.") }
         return false
     }
 
@@ -141,7 +141,7 @@ final class SystemAudioCapture: NSObject, SCStreamOutput, SCStreamDelegate {
                 }
                 guard result != .error else {
                     if let conversionError { throw conversionError }
-                    throw AppError.message("The system-audio format could not be converted.")
+                    throw AppError.message("macino couldn't convert system audio for your TV.")
                 }
                 guard converted.frameLength > 0 else { return }
                 let audioBuffer = converted.audioBufferList.pointee.mBuffers
@@ -150,10 +150,10 @@ final class SystemAudioCapture: NSObject, SCStreamOutput, SCStreamDelegate {
                 handleLock.lock(); let destination = writer; handleLock.unlock()
                 try destination?.write(contentsOf: bytes)
             }
-        } catch { if !isStopped { onFailure?("System audio stream failed: \(error.localizedDescription)") } }
+        } catch { if !isStopped { onFailure?("System audio stopped unexpectedly. Try starting screen sharing again.") } }
     }
 
     func stream(_ stream: SCStream, didStopWithError error: Error) {
-        if !isStopped { onFailure?("System audio capture stopped: \(error.localizedDescription)") }
+        if !isStopped { onFailure?("macino lost access to system audio. Check Screen Recording access and try again.") }
     }
 }
