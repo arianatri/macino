@@ -1,0 +1,11 @@
+Screen mirroring integration components
+
+Portions of the DLNA/UPnP screen mirroring implementation in Sources/macino/
+are derived from MirrorCast for macOS by Rene Grebenstein / Greenstein.Design.
+Copyright Rene Grebenstein. Licensed under the PolyForm Noncommercial License 1.0.0.
+https://github.com/greensteindesign/mirrorcast-macos
+https://polyformproject.org/licenses/noncommercial/1.0.0
+
+The upstream code uses FFmpeg as an external executable. macino does not bundle
+FFmpeg. System audio capture requires a separately installed audio loopback
+device such as BlackHole; macino does not install audio drivers automatically.

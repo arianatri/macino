@@ -19,6 +19,9 @@ network tools, Android connections and an offline reader into one native Mac app
 - **Internet:** inspect network activity and manage supported DNS/proxy settings.
 - **Android:** browse an MTP device and mirror its screen over USB or Wi-Fi with
   the bundled tools. Device setup and Android permissions still apply.
+- **TV:** mirror the Mac display to compatible DLNA televisions on the same
+  network, including non-Android smart TVs. FFmpeg is required; system audio
+  also needs an optional loopback audio device.
 - **Reader:** listen to mixed Persian and English text offline. Type or paste,
   or open TXT, text PDF, DOCX and DOC files. Follow sentence highlights and adjust
   the speed. Scanned documents and OCR aren’t supported.

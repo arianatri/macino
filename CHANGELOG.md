@@ -1,5 +1,16 @@
 # What’s new
 
+## 1.1.0
+
+- Added a TV tab that discovers DLNA televisions on the local network and
+  streams the Mac display, with start/stop controls and TV-compatible profiles.
+- Added optional system audio capture through a separately installed loopback
+  device such as BlackHole.
+- Added first-run permission descriptions for screen capture and local network
+  access.
+- The TV mirroring component uses the PolyForm Noncommercial License; see
+  `docs/third-party.md` before redistributing.
+
 ## 1.0.0
 
 The first release of macino brings the everyday tools into one menu bar app:

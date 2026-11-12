@@ -39,6 +39,21 @@ Android device that supports wireless debugging, a pairing code and the correct
 pairing/connection ports. The Mac and phone must be able to reach each other.
 Physical-device compatibility is not guaranteed for every phone.
 
+## TV screen sharing
+
+Open **TV**, refresh the list, choose a DLNA television on the same network and
+start sharing. Stop sharing to end the stream. Choose a video profile if the TV
+does not accept the default format. Screen Recording permission is requested by
+macOS when capture starts. The stream stays on your local network. A few seconds
+of delay is normal; protected video may be blank.
+
+FFmpeg must be installed separately (`brew install ffmpeg`). macino does not
+install it. To send system sound, install BlackHole 2ch separately, select it
+as the Mac's sound output, then turn on **Send Mac audio to TV** in macino.
+The Mac's normal speaker output changes while BlackHole is selected; the TV
+plays the captured sound. macino does not install audio drivers automatically.
+This feature uses DLNA/UPnP, not Miracast or Android TV.
+
 ## Offline Reader
 
 Choose **Type text** to write or paste, then **Read text**. Alternatively drop a

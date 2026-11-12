@@ -5,7 +5,7 @@ struct AnimatedTabs: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Namespace private var highlight
     @State private var hovered: String?
-    private let tabs = ["System", "Processes", "Quick Access", "Internet", "Android", "Reader", "Clipboard"]
+    private let tabs = ["System", "Processes", "Quick Access", "Internet", "TV", "Android", "Reader", "Clipboard"]
 
     var body: some View {
         HStack(spacing: 5) {

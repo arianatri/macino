@@ -156,6 +156,7 @@ struct MainView: View {
                     case "System": systemView
                     case "Processes": processesView
                     case "Quick Access": foldersView
+                    case "TV": TVMirrorView()
                     case "Android": AndroidView(model: android)
                     case "Reader": ReaderView(reader: reader)
                     case "Clipboard": ClipboardHistoryView(history: ClipboardHistory.shared)
