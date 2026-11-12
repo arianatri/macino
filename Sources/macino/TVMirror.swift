@@ -12,9 +12,9 @@ final class TVMirrorModel: ObservableObject {
     @Published private(set) var audioAvailable = false
     @Published var profileID = "m2ts-h264"
     private let engine = MirrorEngine()
+    private var checkedAudio = false
 
     private init() {
-        audioAvailable = MirrorEngine.hasLoopbackAudio
         engine.onState = { [weak self] state in
             guard let self else { return }
             switch state {
@@ -27,6 +27,14 @@ final class TVMirrorModel: ObservableObject {
     }
 
     var selected: DLNADevice? { devices.first { $0.uuid == selectedID } }
+    func checkAudio() {
+        guard !checkedAudio else { return }
+        checkedAudio = true
+        Task {
+            let available = await Task.detached(priority: .utility) { MirrorEngine.hasLoopbackAudio }.value
+            audioAvailable = available
+        }
+    }
     func refresh() {
         guard !busy else { return }
         busy = true; status = "Searching for TVs…"
@@ -85,6 +93,6 @@ struct TVMirrorView: View {
                     if model.busy { ProgressView().controlSize(.small) }
                 }
             }
-        }.onAppear { if model.devices.isEmpty { model.refresh() } }
+        }.onAppear { model.checkAudio(); if model.devices.isEmpty { model.refresh() } }
     }
 }
