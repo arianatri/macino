@@ -16,6 +16,6 @@ included in `Resources/MirrorCast-NONCOMMERCIAL-LICENSE.txt`, with attribution
 in `Resources/MirrorCast-NOTICE.txt`. This component may only be used and
 redistributed for permitted noncommercial purposes under that license.
 
-TV mirroring invokes a separately installed FFmpeg executable. System audio
-capture requires a separately installed loopback audio driver such as
-BlackHole; that driver is not part of macino.
+TV mirroring invokes a separately installed FFmpeg executable. macino captures
+system audio with Apple's ScreenCaptureKit; no third-party audio driver is
+required.

@@ -30,6 +30,7 @@ final class MirrorEngine {
     private var streamURL: String = ""
     private var profile: MirrorProfile = .all[0]
     private var stoppedByUser = false
+    private var audioCapture: SystemAudioCapture?
 
     var isRunning: Bool {
         if case .idle = state { return false }
@@ -67,14 +68,6 @@ final class MirrorEngine {
     static func screenIndex(from listing: String) -> String {
         rxFirst(listing, #"\[(\d+)\]\s+Capture screen 0"#) ?? "0"
     }
-
-    /// Index of a loopback input (BlackHole) so system sound can be captured.
-    static func audioIndex(from listing: String) -> String? {
-        guard let audioPart = listing.components(separatedBy: "audio devices:").last else { return nil }
-        return rxFirst(audioPart, #"\[(\d+)\]\s+[^\n]*BlackHole"#)
-    }
-
-    static var hasLoopbackAudio: Bool { audioIndex(from: deviceListing()) != nil }
 
     private static func localAddress(towards host: String) -> String {
         let fd = socket(AF_INET, SOCK_DGRAM, 0)
@@ -125,16 +118,24 @@ final class MirrorEngine {
 
             let listing = Self.deviceListing()
             let screen = Self.screenIndex(from: listing)
-            let audio = captureAudio ? Self.audioIndex(from: listing) : nil
+            let fifo = captureAudio ? FileManager.default.temporaryDirectory.appendingPathComponent("macino-audio-\(UUID().uuidString).pcm") : nil
 
             let hub = StreamHub(ffmpeg: ffmpeg,
-                                arguments: profile.ffmpegArguments(screenIndex: screen, audioIndex: audio))
+                                arguments: profile.ffmpegArguments(screenIndex: screen, audioFIFOPath: fifo?.path))
             hub.onEncoderFailure = { [weak self] message in
                 self?.state = .failed(message)
                 self?.teardown()
             }
             self.hub = hub
             hub.start()
+            if let fifo {
+                let capture = SystemAudioCapture(fifoURL: fifo)
+                capture.onFailure = { [weak self] message in
+                    self?.fail(message)
+                }
+                self.audioCapture = capture
+                capture.start()
+            }
 
             let server = HTTPStreamServer(port: Self.streamPort, hub: hub)
             server.mime = profile.mime
@@ -178,6 +179,14 @@ final class MirrorEngine {
         state = .idle
     }
 
+    private func fail(_ message: String) {
+        guard !stoppedByUser else { return }
+        stoppedByUser = true
+        transport?.stop()
+        teardown()
+        state = .failed(message)
+    }
+
     /// Starts capture + HTTP server without pushing to a TV. Used to verify the
     /// local half of the pipeline:
     ///   MIRRORCAST_SELFTEST=1 open -a MirrorCast
@@ -193,7 +202,7 @@ final class MirrorEngine {
         let hub = StreamHub(ffmpeg: ffmpeg,
                             arguments: profile.ffmpegArguments(
                                 screenIndex: Self.screenIndex(from: listing),
-                                audioIndex: captureAudio ? Self.audioIndex(from: listing) : nil))
+                                audioFIFOPath: nil))
         hub.onEncoderFailure = { [weak self] in self?.state = .failed($0) }
         self.hub = hub
         hub.start()
@@ -220,6 +229,7 @@ final class MirrorEngine {
 
     private func teardown() {
         watchdog?.cancel(); watchdog = nil
+        audioCapture?.stop(); audioCapture = nil
         server?.stop(); server = nil
         hub?.stop(); hub = nil
     }

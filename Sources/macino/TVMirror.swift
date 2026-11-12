@@ -8,11 +8,9 @@ final class TVMirrorModel: ObservableObject {
     @Published var status = "Find your TV on the local network."
     @Published var busy = false
     @Published var sharing = false
-    @Published var audio = false
-    @Published private(set) var audioAvailable = false
+    @Published var audio = true
     @Published var profileID = "m2ts-h264"
     private let engine = MirrorEngine()
-    private var checkedAudio = false
 
     private init() {
         engine.onState = { [weak self] state in
@@ -27,14 +25,6 @@ final class TVMirrorModel: ObservableObject {
     }
 
     var selected: DLNADevice? { devices.first { $0.uuid == selectedID } }
-    func checkAudio() {
-        guard !checkedAudio else { return }
-        checkedAudio = true
-        Task {
-            let available = await Task.detached(priority: .utility) { MirrorEngine.hasLoopbackAudio }.value
-            audioAvailable = available
-        }
-    }
     func refresh() {
         guard !busy else { return }
         busy = true; status = "Searching for TVs…"
@@ -51,7 +41,7 @@ final class TVMirrorModel: ObservableObject {
         guard let selected else { status = "Choose a TV first."; return }
         guard MirrorEngine.findFFmpeg() != nil else { status = "FFmpeg is required. Install it with Homebrew, then restart macino."; return }
         let profile = MirrorProfile.by(id: profileID)
-        engine.start(device: selected, profile: profile, captureAudio: audio && audioAvailable)
+        engine.start(device: selected, profile: profile, captureAudio: audio)
     }
     func stop() { engine.stop(); sharing = false; status = "Sharing stopped." }
 }
@@ -60,7 +50,7 @@ struct TVMirrorView: View {
     @StateObject private var model = TVMirrorModel.shared
     var body: some View {
         VStack(spacing: 14) {
-            Card(title: "TV screen sharing", info: "Sends a live copy of your Mac display to DLNA TVs on the same network. It works with many non-Android Samsung TVs, including older models. macOS asks for Screen Recording permission when you start. FFmpeg must be installed on this Mac. System audio is optional and requires BlackHole 2ch, a separate audio driver. Video may have a few seconds of delay; protected video can appear black.") {
+            Card(title: "TV screen sharing", info: "Sends your Mac display to compatible DLNA TVs on the same local network, including non-Android TVs. FFmpeg must be installed. macOS asks for Screen Recording access when sharing starts. System audio uses Apple’s built-in capture and does not need an extra driver or a change to your Mac’s sound output. Protected video may appear black, and a short delay is normal.") {
                 HStack(spacing: 10) {
                     Image(systemName: "tv.and.mediabox.fill").font(.title2).foregroundStyle(.teal)
                     VStack(alignment: .leading, spacing: 3) {
@@ -78,13 +68,7 @@ struct TVMirrorView: View {
                 Picker("Video quality", selection: $model.profileID) {
                     ForEach(MirrorProfile.all, id: \.id) { Text($0.title).tag($0.id) }
                 }.disabled(model.sharing)
-                Toggle("Send Mac audio to TV", isOn: $model.audio).disabled(!model.audioAvailable || model.sharing)
-                if !model.audioAvailable {
-                    Text("For sound, install BlackHole 2ch and select it as your Mac’s audio output. macino will then include it with the TV stream.")
-                        .font(.caption).foregroundStyle(.secondary)
-                    Link("BlackHole setup", destination: URL(string: "https://github.com/ExistentialAudio/BlackHole")!)
-                        .font(.caption)
-                }
+                Toggle("Send Mac audio to TV", isOn: $model.audio).disabled(model.sharing)
                 Text(model.status).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
                 HStack {
                     if model.sharing { Button("Stop sharing", role: .destructive) { model.stop() } }
@@ -93,6 +77,6 @@ struct TVMirrorView: View {
                     if model.busy { ProgressView().controlSize(.small) }
                 }
             }
-        }.onAppear { model.checkAudio(); if model.devices.isEmpty { model.refresh() } }
+        }.onAppear { if model.devices.isEmpty { model.refresh() } }
     }
 }

@@ -7,5 +7,5 @@ https://github.com/greensteindesign/mirrorcast-macos
 https://polyformproject.org/licenses/noncommercial/1.0.0
 
 The upstream code uses FFmpeg as an external executable. macino does not bundle
-FFmpeg. System audio capture requires a separately installed audio loopback
-device such as BlackHole; macino does not install audio drivers automatically.
+FFmpeg. macino's system-audio path uses Apple's ScreenCaptureKit and does not
+require a separate loopback audio driver.

@@ -105,12 +105,16 @@ struct MirrorProfile: Equatable {
         all.first { $0.id == id } ?? all[0]
     }
 
-    func ffmpegArguments(screenIndex: String, audioIndex: String?) -> [String] {
+    func ffmpegArguments(screenIndex: String, audioFIFOPath: String?) -> [String] {
         var args = ["-hide_banner", "-loglevel", "warning",
                     "-f", "avfoundation", "-capture_cursor", "1", "-framerate", "25",
-                    "-i", "\(screenIndex):\(audioIndex ?? "none")"]
+                    "-i", "\(screenIndex):none"]
+        if let audioFIFOPath {
+            args += ["-f", "s16le", "-ar", "48000", "-ac", "2", "-i", audioFIFOPath,
+                     "-map", "0:v:0", "-map", "1:a:0"]
+        }
         args += videoArgs
-        args += (audioIndex != nil ? audioArgs : ["-an"])
+        args += (audioFIFOPath != nil ? audioArgs : ["-an"])
         args += muxArgs
         args.append("pipe:1")
         return args

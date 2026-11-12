@@ -48,11 +48,13 @@ macOS when capture starts. The stream stays on your local network. A few seconds
 of delay is normal; protected video may be blank.
 
 FFmpeg must be installed separately (`brew install ffmpeg`). macino does not
-install it. To send system sound, install BlackHole 2ch separately, select it
-as the Mac's sound output, then turn on **Send Mac audio to TV** in macino.
-The Mac's normal speaker output changes while BlackHole is selected; the TV
-plays the captured sound. macino does not install audio drivers automatically.
-This feature uses DLNA/UPnP, not Miracast or Android TV.
+install it. **Send Mac audio to TV** is on by default and captures system audio
+with Apple's ScreenCaptureKit. macino does not capture your microphone, install
+an audio driver or change your Mac's sound output. macOS asks for Screen
+Recording access the first time; allow macino and FFmpeg in **System Settings →
+Privacy & Security → Screen Recording** if either prompt appears. If you don't
+want sound in the TV stream, turn the option off. This feature uses DLNA/UPnP,
+not Miracast or Android TV.
 
 ## Offline Reader
 

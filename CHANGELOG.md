@@ -1,5 +1,12 @@
 # What’s new
 
+## 1.1.1
+
+- Captures TV stream audio with Apple's built-in ScreenCaptureKit, with no
+  BlackHole installation or Mac audio-output change.
+- Explains the Screen Recording permission used for picture and system sound.
+- Stops sharing with a clear error if system-audio capture cannot start.
+
 ## 1.1.0
 
 - Added a TV tab that discovers DLNA televisions on the local network and

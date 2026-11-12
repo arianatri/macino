@@ -2,7 +2,7 @@
   <img src="docs/assets/icon.png" width="88" alt="macino icon">
   <h1>macino</h1>
   <p>Everyday Mac tools. One place in your menu bar.</p>
-  <p><strong>1.0.0 · Apple silicon · macOS 14+</strong></p>
+  <p><strong>1.1.1 · Apple silicon · macOS 14+</strong></p>
   <p><a href="https://github.com/ArianAtri/macino/releases">Downloads & releases</a> · <a href="docs/install.md">Install</a> · <a href="docs/guide.md">User guide</a></p>
 </div>
 
@@ -20,8 +20,8 @@ network tools, Android connections and an offline reader into one native Mac app
 - **Android:** browse an MTP device and mirror its screen over USB or Wi-Fi with
   the bundled tools. Device setup and Android permissions still apply.
 - **TV:** mirror the Mac display to compatible DLNA televisions on the same
-  network, including non-Android smart TVs. FFmpeg is required; system audio
-  also needs an optional loopback audio device.
+  network, including non-Android smart TVs. FFmpeg is required. System audio
+  uses Apple’s built-in capture and does not need a separate audio driver.
 - **Reader:** listen to mixed Persian and English text offline. Type or paste,
   or open TXT, text PDF, DOCX and DOC files. Follow sentence highlights and adjust
   the speed. Scanned documents and OCR aren’t supported.
